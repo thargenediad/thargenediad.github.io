@@ -107,6 +107,7 @@
         <h1>March Madness Bracket Predictor 2025</h1>
         
         <button id="simulateButton">Simulate Tournament</button>
+        <button id="statsButton">Generate Historical Stats</button>
         
         <div id="loading">
             <div class="spinner"></div>
@@ -114,10 +115,11 @@
         </div>
         
         <div id="results" class="results"></div>
+        <div id="statsResults" class="results" style="display: none;"></div>
         
         <button id="saveButton" class="save-button" style="display: none;">Save Results</button>
     </div>
-
+    
     <script>
         // Initialize Teams SDK
         microsoftTeams.initialize();
@@ -305,25 +307,68 @@
             const team1Data = getTeamData(team1.name);
             const team2Data = getTeamData(team2.name);
             
-            // Calculate base win probability using seed difference
-            let seedDifference = Math.abs(seed1 - seed2);
+            // Historical upset rates by seed matchup and round
+            const historicalUpsetRates = {
+                // First round (R64) specific matchups
+                "1-16": 0.01,   // 1 in 100 chance (historical: 1 in ~135)
+                "2-15": 0.065,  // ~6.5% chance (historical: ~8/124 = ~6.5%)
+                "3-14": 0.13,   // ~13% chance (historical: ~16/124 = ~13%)
+                "4-13": 0.21,   // ~21% chance (historical: ~26/124 = ~21%)
+                "5-12": 0.355,  // ~35.5% chance (historical: ~44/124 = ~35.5%)
+                "6-11": 0.37,   // ~37% chance (historical: ~46/124 = ~37%)
+                "7-10": 0.40,   // ~40% chance (historical: ~50/124 = ~40%)
+                "8-9": 0.50,    // ~50% chance (historical: ~62/124 = ~50%)
+                
+                // Later rounds - probability that lower seed wins
+                "R32": 0.38,    // ~38% in Round of 32
+                "S16": 0.34,    // ~34% in Sweet 16
+                "E8": 0.30,     // ~30% in Elite 8
+                "F4": 0.30,     // ~30% in Final Four
+                "NCG": 0.25     // ~25% in Championship
+            };
             
-            // Base probability calculation considering seed difference
+            // Determine base probability from historical matchup data
             let baseProbability;
-            if (seed1 < seed2) {
-                // Team1 is the higher seed (lower number)
-                baseProbability = 0.5 + (seedDifference * 0.05);
-            } else if (seed2 < seed1) {
-                // Team2 is the higher seed (lower number)
-                baseProbability = 0.5 - (seedDifference * 0.05);
-            } else {
-                // Same seed
-                baseProbability = 0.5;
-            }
             
-            // Adjust by round - deeper rounds favor better seeds
-            const roundFactor = team1.round * 0.01; // Increases importance of seed as tournament progresses
-            baseProbability += (seed1 < seed2) ? roundFactor : -roundFactor;
+            if (team1.round === 1) {
+                // First round matchups use specific historical rates
+                const matchupKey = (seed1 < seed2) ? `${seed1}-${seed2}` : `${seed2}-${seed1}`;
+                if (historicalUpsetRates[matchupKey] !== undefined) {
+                    baseProbability = (seed1 < seed2) ? 
+                        1 - historicalUpsetRates[matchupKey] : 
+                        historicalUpsetRates[matchupKey];
+                } else {
+                    // Fallback for matchups without historical data
+                    const seedDifference = Math.abs(seed1 - seed2);
+                    baseProbability = (seed1 < seed2) ?
+                        0.5 + (seedDifference * 0.05) :
+                        0.5 - (seedDifference * 0.05);
+                }
+            } else {
+                // Later rounds use round-specific upset rates
+                const roundKey = team1.round === 2 ? "R32" :
+                                team1.round === 3 ? "S16" :
+                                team1.round === 4 ? "E8" :
+                                team1.round === 5 ? "F4" : "NCG";
+                
+                // Determine if there's a seed difference (potential upset)
+                if (seed1 !== seed2) {
+                    const higherSeed = Math.min(seed1, seed2);
+                    const lowerSeed = Math.max(seed1, seed2);
+                    
+                    // Adjust probability based on magnitude of potential upset
+                    const seedDifference = lowerSeed - higherSeed;
+                    const upsetProbability = historicalUpsetRates[roundKey] * 
+                        (1 - (0.05 * (lowerSeed - higherSeed - 1)));
+                    
+                    baseProbability = (seed1 < seed2) ?
+                        1 - upsetProbability :
+                        upsetProbability;
+                } else {
+                    // Equal seeds
+                    baseProbability = 0.5;
+                }
+            }
             
             // Adjust for team quality factors from KenPom and other metrics
             
@@ -348,26 +393,14 @@
             let finalProbability = baseProbability + efficiencyAdvantage + kenpomDiff + formAdvantage + 
                                 injuryAdvantage + expAdvantage;
             
-            // Add a smaller random factor for unpredictability (March Madness!)
-            const randomFactor = (Math.random() * 0.15) - 0.075; // ±7.5%
+            // Add a random factor for unpredictability (March Madness!)
+            // Random factor varies by round - early rounds are more chaotic
+            const randomFactorMagnitude = [0.15, 0.12, 0.10, 0.08, 0.06, 0.05][team1.round - 1] || 0.05;
+            const randomFactor = (Math.random() * randomFactorMagnitude * 2) - randomFactorMagnitude;
             finalProbability += randomFactor;
             
-            // Ensure probability stays between 0 and 1
+            // Ensure probability stays between 0.02 and 0.98
             finalProbability = Math.max(0.02, Math.min(0.98, finalProbability));
-            
-            // Add a slight adjustment for 12-5, 11-6, 10-7 matchups which historically have more upsets
-            if (team1.round === 1) {
-                if ((seed1 === 5 && seed2 === 12) || (seed1 === 12 && seed2 === 5)) {
-                    // Adjust toward the 12 seed slightly
-                    finalProbability = (seed1 === 5) ? finalProbability - 0.08 : finalProbability + 0.08;
-                } else if ((seed1 === 6 && seed2 === 11) || (seed1 === 11 && seed2 === 6)) {
-                    // Adjust toward the 11 seed slightly
-                    finalProbability = (seed1 === 6) ? finalProbability - 0.07 : finalProbability + 0.07;
-                } else if ((seed1 === 7 && seed2 === 10) || (seed1 === 10 && seed2 === 7)) {
-                    // Adjust toward the 10 seed slightly
-                    finalProbability = (seed1 === 7) ? finalProbability - 0.05 : finalProbability + 0.05;
-                }
-            }
             
             // Simulate the game
             return Math.random() < finalProbability ? team1 : team2;
@@ -706,6 +739,125 @@
             // Show save button
             document.getElementById('saveButton').style.display = 'block';
         }
+
+        // Function to generate statistics about simulation outcomes
+        function generateSimStats(numSimulations = 1000) {
+            const stats = {
+                upsetsByRound: {
+                    "R64": { total: 0, byMatchup: {} },
+                    "R32": { total: 0 },
+                    "S16": { total: 0 },
+                    "E8": { total: 0 },
+                    "F4": { total: 0 },
+                    "NCG": { total: 0 }
+                },
+                seedAdvancement: {
+                    "R32": {}, // How often each seed advances to Round of 32
+                    "S16": {}, // How often each seed advances to Sweet 16
+                    "E8": {},  // How often each seed advances to Elite 8
+                    "F4": {},  // How often each seed advances to Final Four
+                    "NCG": {}, // How often each seed advances to Championship
+                    "Champion": {} // How often each seed wins Championship
+                },
+                champsByRegion: {}
+            };
+            
+            // Initialize seed advancement counters
+            for (let seed = 1; seed <= 16; seed++) {
+                stats.seedAdvancement.R32[seed] = 0;
+                stats.seedAdvancement.S16[seed] = 0;
+                stats.seedAdvancement.E8[seed] = 0;
+                stats.seedAdvancement.F4[seed] = 0;
+                stats.seedAdvancement.NCG[seed] = 0;
+                stats.seedAdvancement.Champion[seed] = 0;
+            }
+            
+            // Run simulations
+            for (let i = 0; i < numSimulations; i++) {
+                const results = simulateTournament(JSON.parse(JSON.stringify(roundOf64)));
+                
+                // Process Round of 64 results
+                results.roundOf64.forEach(match => {
+                    const higherSeed = Math.min(parseInt(match.seed1), parseInt(match.seed2));
+                    const lowerSeed = Math.max(parseInt(match.seed1), parseInt(match.seed2));
+                    const winnerSeed = parseInt(match.winnerSeed);
+                    
+                    // Track upsets
+                    if (winnerSeed > higherSeed) {
+                        stats.upsetsByRound.R64.total++;
+                        
+                        // Track by matchup
+                        const matchupKey = `${higherSeed}-${lowerSeed}`;
+                        if (!stats.upsetsByRound.R64.byMatchup[matchupKey]) {
+                            stats.upsetsByRound.R64.byMatchup[matchupKey] = 0;
+                        }
+                        stats.upsetsByRound.R64.byMatchup[matchupKey]++;
+                    }
+                    
+                    // Track seed advancement
+                    stats.seedAdvancement.R32[winnerSeed]++;
+                });
+                
+                // Process later rounds
+                processRoundResults(results.roundOf32, "R32", "S16", stats);
+                processRoundResults(results.sweet16, "S16", "E8", stats);
+                processRoundResults(results.elite8, "E8", "F4", stats);
+                processRoundResults(results.finalFour, "F4", "NCG", stats);
+                processRoundResults(results.championship, "NCG", "Champion", stats);
+                
+                // Track champion region
+                const championTeamInfo = roundOf64.find(team => team.name === results.champion.name);
+                if (championTeamInfo) {
+                    if (!stats.champsByRegion[championTeamInfo.region]) {
+                        stats.champsByRegion[championTeamInfo.region] = 0;
+                    }
+                    stats.champsByRegion[championTeamInfo.region]++;
+                }
+            }
+            
+            // Convert counts to percentages
+            for (const round in stats.upsetsByRound) {
+                if (round === "R64") {
+                    for (const matchup in stats.upsetsByRound[round].byMatchup) {
+                        stats.upsetsByRound[round].byMatchup[matchup] = 
+                            (stats.upsetsByRound[round].byMatchup[matchup] / numSimulations * 100).toFixed(1) + "%";
+                    }
+                }
+                stats.upsetsByRound[round].total = 
+                    (stats.upsetsByRound[round].total / numSimulations * 100).toFixed(1) + "%";
+            }
+            
+            for (const round in stats.seedAdvancement) {
+                for (const seed in stats.seedAdvancement[round]) {
+                    stats.seedAdvancement[round][seed] = 
+                        (stats.seedAdvancement[round][seed] / numSimulations * 100).toFixed(1) + "%";
+                }
+            }
+            
+            for (const region in stats.champsByRegion) {
+                stats.champsByRegion[region] = 
+                    (stats.champsByRegion[region] / numSimulations * 100).toFixed(1) + "%";
+            }
+            
+            return stats;
+        }
+        
+        // Helper function to process round results for stats
+        function processRoundResults(roundResults, currentRound, nextRound, stats) {
+            roundResults.forEach(match => {
+                const higherSeed = Math.min(parseInt(match.seed1), parseInt(match.seed2));
+                const lowerSeed = Math.max(parseInt(match.seed1), parseInt(match.seed2));
+                const winnerSeed = parseInt(match.winnerSeed);
+                
+                // Track upsets
+                if (winnerSeed > higherSeed) {
+                    stats.upsetsByRound[currentRound].total++;
+                }
+                
+                // Track seed advancement
+                stats.seedAdvancement[nextRound][winnerSeed]++;
+            });
+        }
         
         // Event listeners
         document.getElementById('simulateButton').addEventListener('click', function() {
@@ -731,6 +883,196 @@
             // Save results functionality for Teams
             // For demonstration, we'll just alert the user
             microsoftTeams.dialog.submit("Bracket prediction saved!");
+        });
+        
+        // Function to display statistical info
+        function displayStatistics(stats) {
+            const statsDiv = document.getElementById('statsResults');
+            statsDiv.innerHTML = '';
+            statsDiv.style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            
+            // Create header
+            const header = document.createElement('h2');
+            header.textContent = 'Historical Simulation Statistics';
+            header.style.textAlign = 'center';
+            header.style.marginBottom = '20px';
+            statsDiv.appendChild(header);
+            
+            // First Round Upset Stats
+            const r64Header = document.createElement('h3');
+            r64Header.textContent = 'First Round Upset Rates';
+            r64Header.style.color = '#6264A7';
+            statsDiv.appendChild(r64Header);
+            
+            const r64Table = document.createElement('table');
+            r64Table.style.width = '100%';
+            r64Table.style.marginBottom = '20px';
+            r64Table.style.borderCollapse = 'collapse';
+            
+            // Create header row
+            let headerRow = document.createElement('tr');
+            ['Matchup', 'Upset Rate'].forEach(text => {
+                const th = document.createElement('th');
+                th.textContent = text;
+                th.style.padding = '8px';
+                th.style.backgroundColor = '#f2f2f2';
+                th.style.border = '1px solid #ddd';
+                headerRow.appendChild(th);
+            });
+            r64Table.appendChild(headerRow);
+            
+            // Add data rows sorted by matchup
+            const matchups = Object.keys(stats.upsetsByRound.R64.byMatchup).sort();
+            matchups.forEach(matchup => {
+                const row = document.createElement('tr');
+                
+                const matchupCell = document.createElement('td');
+                matchupCell.textContent = matchup + ' Matchup';
+                matchupCell.style.padding = '8px';
+                matchupCell.style.border = '1px solid #ddd';
+                row.appendChild(matchupCell);
+                
+                const rateCell = document.createElement('td');
+                rateCell.textContent = stats.upsetsByRound.R64.byMatchup[matchup];
+                rateCell.style.padding = '8px';
+                rateCell.style.border = '1px solid #ddd';
+                row.appendChild(rateCell);
+                
+                r64Table.appendChild(row);
+            });
+            
+            statsDiv.appendChild(r64Table);
+            
+            // Seed Advancement Stats
+            const advHeader = document.createElement('h3');
+            advHeader.textContent = 'Seed Advancement Rates';
+            advHeader.style.color = '#6264A7';
+            statsDiv.appendChild(advHeader);
+            
+            const advTable = document.createElement('table');
+            advTable.style.width = '100%';
+            advTable.style.marginBottom = '20px';
+            advTable.style.borderCollapse = 'collapse';
+            
+            // Create header row with rounds
+            headerRow = document.createElement('tr');
+            ['Seed', 'Sweet 16', 'Elite 8', 'Final Four', 'Championship', 'Champion'].forEach(text => {
+                const th = document.createElement('th');
+                th.textContent = text;
+                th.style.padding = '8px';
+                th.style.backgroundColor = '#f2f2f2';
+                th.style.border = '1px solid #ddd';
+                headerRow.appendChild(th);
+            });
+            advTable.appendChild(headerRow);
+            
+            // Add data rows for seeds 1-16
+            for (let seed = 1; seed <= 16; seed++) {
+                const row = document.createElement('tr');
+                
+                const seedCell = document.createElement('td');
+                seedCell.textContent = seed;
+                seedCell.style.padding = '8px';
+                seedCell.style.border = '1px solid #ddd';
+                seedCell.style.fontWeight = 'bold';
+                row.appendChild(seedCell);
+                
+                ['S16', 'E8', 'F4', 'NCG', 'Champion'].forEach(round => {
+                    const cell = document.createElement('td');
+                    cell.textContent = stats.seedAdvancement[round][seed];
+                    cell.style.padding = '8px';
+                    cell.style.border = '1px solid #ddd';
+                    row.appendChild(cell);
+                });
+                
+                advTable.appendChild(row);
+            }
+            
+            statsDiv.appendChild(advTable);
+            
+            // Champion by Region
+            const regionHeader = document.createElement('h3');
+            regionHeader.textContent = 'Champion by Region';
+            regionHeader.style.color = '#6264A7';
+            statsDiv.appendChild(regionHeader);
+            
+            const regionTable = document.createElement('table');
+            regionTable.style.width = '100%';
+            regionTable.style.marginBottom = '20px';
+            regionTable.style.borderCollapse = 'collapse';
+            
+            // Create header row
+            headerRow = document.createElement('tr');
+            ['Region', 'Championship Rate'].forEach(text => {
+                const th = document.createElement('th');
+                th.textContent = text;
+                th.style.padding = '8px';
+                th.style.backgroundColor = '#f2f2f2';
+                th.style.border = '1px solid #ddd';
+                headerRow.appendChild(th);
+            });
+            regionTable.appendChild(headerRow);
+            
+            // Add data rows
+            Object.keys(stats.champsByRegion).sort().forEach(region => {
+                const row = document.createElement('tr');
+                
+                const regionCell = document.createElement('td');
+                regionCell.textContent = region;
+                regionCell.style.padding = '8px';
+                regionCell.style.border = '1px solid #ddd';
+                row.appendChild(regionCell);
+                
+                const rateCell = document.createElement('td');
+                rateCell.textContent = stats.champsByRegion[region];
+                rateCell.style.padding = '8px';
+                rateCell.style.border = '1px solid #ddd';
+                row.appendChild(rateCell);
+                
+                regionTable.appendChild(row);
+            });
+            
+            statsDiv.appendChild(regionTable);
+            
+            // Back to bracket button
+            const backButton = document.createElement('button');
+            backButton.textContent = 'Back to Bracket';
+            backButton.style.backgroundColor = '#6264A7';
+            backButton.style.color = 'white';
+            backButton.style.border = 'none';
+            backButton.style.padding = '10px 20px';
+            backButton.style.fontSize = '16px';
+            backButton.style.cursor = 'pointer';
+            backButton.style.borderRadius = '4px';
+            backButton.style.display = 'block';
+            backButton.style.margin = '20px auto';
+            
+            backButton.addEventListener('click', function() {
+                document.getElementById('statsResults').style.display = 'none';
+                document.getElementById('results').style.display = 'block';
+            });
+            
+            statsDiv.appendChild(backButton);
+        }
+        
+        // Event listeners for the buttons
+        document.getElementById('statsButton').addEventListener('click', function() {
+            // Show loading spinner
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('statsResults').innerHTML = '';
+            
+            // Use setTimeout to allow the UI to update before running the simulation
+            setTimeout(function() {
+                // Generate stats from 1000 simulations
+                const stats = generateSimStats(1000);
+                
+                // Display statistics
+                displayStatistics(stats);
+                
+                // Hide loading spinner
+                document.getElementById('loading').style.display = 'none';
+            }, 100);
         });
     </script>
 </body>
