@@ -127,155 +127,646 @@
         // Team data with statistics based on KenPom and other metrics
         const teamData = {
             // 1 Seeds
-            "Houston": {
-                kenpomRank: 3,
-                offensiveEfficiency: 118.2, // Top 15
-                defensiveEfficiency: 87.1,  // Top 3
-                recentForm: 9,              // Scale 1-10
-                injuryImpact: 9,            // Scale 1-10 (10 = fully healthy)
-                tournamentExperience: 9,    // Scale 1-10
-                region: "Midwest"
-            },
-            "Auburn": {
-                kenpomRank: 2,
-                offensiveEfficiency: 120.8, // Top 5
-                defensiveEfficiency: 89.4,  // Top 10
-                recentForm: 6,              // Lost 3 of last 4 before tournament
-                injuryImpact: 9,            
-                tournamentExperience: 7,
-                region: "South"
-            },
             "Duke": {
                 kenpomRank: 1,
-                offensiveEfficiency: 122.1, // Top 3
-                defensiveEfficiency: 88.7,  // Top 5
-                recentForm: 9,              // Very strong recent performance
-                injuryImpact: 6,            // Cooper Flagg ankle injury
-                tournamentExperience: 10,
+                offensiveEfficiency: 127.9,
+                defensiveEfficiency: 89.8, 
+                recentForm: 9,               // Subjective: Strong recent performance
+                injuryImpact: 6,             // Subjective: Cooper Flagg ankle injury
+                tournamentExperience: 10,    // Subjective: Program with rich tournament history
                 region: "East"
             },
             "Florida": {
-                kenpomRank: 4,
-                offensiveEfficiency: 123.4, // #1 in KenPom
-                defensiveEfficiency: 91.8,  // Top 15
-                recentForm: 8,
-                injuryImpact: 9,
-                tournamentExperience: 7,
+                kenpomRank: 2,
+                offensiveEfficiency: 128.6,
+                defensiveEfficiency: 92.5, 
+                recentForm: 8,               // Subjective: Strong finish to season
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 7,     // Subjective: Moderate tournament history
                 region: "West"
+            },
+            "Auburn": {
+                kenpomRank: 4,
+                offensiveEfficiency: 128.5,
+                defensiveEfficiency: 93.4, 
+                recentForm: 3,               // Subjective: Lost 3 of last 4 before tournament
+                injuryImpact: 9,             // Subjective: No major injuries reported
+                tournamentExperience: 7,     // Subjective: Moderate tournament history
+                region: "South"
+            },
+            "Houston": {
+                kenpomRank: 3,
+                offensiveEfficiency: 123.2,
+                defensiveEfficiency: 87.8, 
+                recentForm: 9,               // Subjective: Won Big 12 regular season and tournament
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 9,     // Subjective: Multiple deep runs in recent years
+                region: "Midwest"
             },
             
             // 2 Seeds
             "Tennessee": {
                 kenpomRank: 5,
-                offensiveEfficiency: 115.4, // Top 25
-                defensiveEfficiency: 85.9,  // #1 in KenPom
-                recentForm: 7,
-                injuryImpact: 8,
-                tournamentExperience: 8,
+                offensiveEfficiency: 120.3,
+                defensiveEfficiency: 89.2, 
+                recentForm: 7,               // Subjective: Solid recent performance
+                injuryImpact: 8,             // Subjective: Minor injury concerns
+                tournamentExperience: 8,     // Subjective: Good tournament history but no Final Fours
                 region: "East"
             },
             "Alabama": {
-                kenpomRank: 7,
-                offensiveEfficiency: 126.2, // Best offense (91 ppg)
-                defensiveEfficiency: 100.5, // Very poor defense
-                recentForm: 6,              // Lost 2 in a row before tournament
-                injuryImpact: 9,
-                tournamentExperience: 9,
+                kenpomRank: 6,
+                offensiveEfficiency: 126.6,
+                defensiveEfficiency: 96.6, 
+                recentForm: 3,               // Subjective: Lost 2 in a row before tournament
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 9,     // Subjective: Strong tournament history
                 region: "West"
             },
             "Michigan State": {
-                kenpomRank: 8,
-                offensiveEfficiency: 116.8,
-                defensiveEfficiency: 93.4,
-                recentForm: 8,              // Strong finish to season
-                injuryImpact: 9,
-                tournamentExperience: 10,   // Izzo in March
+                kenpomRank: 7,
+                offensiveEfficiency: 121.7,
+                defensiveEfficiency: 98.1, 
+                recentForm: 8,               // Subjective: Strong finish to season
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 10,    // Subjective: Izzo in March gives high experience rating
                 region: "Midwest"
             },
             "St. John's": {
                 kenpomRank: 11,
-                offensiveEfficiency: 114.7,
-                defensiveEfficiency: 93.7,
-                recentForm: 9,              // 30-4 overall, 18-2 in Big East
-                injuryImpact: 9,
-                tournamentExperience: 7,
+                offensiveEfficiency: 114.0,
+                defensiveEfficiency: 87.4, 
+                recentForm: 9,               // Subjective: Strong recent performance
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 7,     // Subjective: Moderate tournament history
                 region: "South"
             },
             
-            // Other notable teams
-            "Wisconsin": {
-                kenpomRank: 12,
-                offensiveEfficiency: 117.1,
-                defensiveEfficiency: 93.4,
-                recentForm: 7,
-                injuryImpact: 8,
-                tournamentExperience: 8,
-                region: "West"
+            // 3 Seeds
+            "Texas Tech": {
+                kenpomRank: 8,
+                offensiveEfficiency: 122.6,
+                defensiveEfficiency: 96.9, 
+                recentForm: 7,               // Subjective: Beat Houston, solid finish
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 7,     // Subjective: Moderate tournament history
+                region: "Midwest"
             },
-            "Iowa State": {
-                kenpomRank: 6,
-                offensiveEfficiency: 115.8,
-                defensiveEfficiency: 90.1,  // Top 10
-                recentForm: 8,
-                injuryImpact: 6,            // Gilbert injury
-                tournamentExperience: 8,
-                region: "South"
+            "Wisconsin": {
+                kenpomRank: 13,
+                offensiveEfficiency: 122.1,
+                defensiveEfficiency: 96.1, 
+                recentForm: 7,               // Subjective: Solid recent performance
+                injuryImpact: 8,             // Subjective: Minor injury concerns
+                tournamentExperience: 8,     // Subjective: Good tournament history
+                region: "West"
             },
             "Kentucky": {
-                kenpomRank: 14,
-                offensiveEfficiency: 119.2,
-                defensiveEfficiency: 97.3,
-                recentForm: 6,
-                injuryImpact: 9,
-                tournamentExperience: 9,
+                kenpomRank: 16,
+                offensiveEfficiency: 123.8,
+                defensiveEfficiency: 99.6, 
+                recentForm: 4,               // Subjective: Underwhelming finish to season
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 9,     // Subjective: Strong tournament history
                 region: "South"
             },
-            "Texas Tech": {
-                kenpomRank: 10,
+            "Iowa State": {
+                kenpomRank: 23,
                 offensiveEfficiency: 119.5,
-                defensiveEfficiency: 95.1,
-                recentForm: 7,              // Beat Houston
-                injuryImpact: 9,
-                tournamentExperience: 7,
+                defensiveEfficiency: 92.5, 
+                recentForm: 8,               // Subjective: Strong finish to season
+                injuryImpact: 6,             // Subjective: Gilbert injury impacts team
+                tournamentExperience: 8,     // Subjective: Good tournament history
+                region: "South"
+            },
+            
+            // 4 Seeds
+            "Arizona": {
+                kenpomRank: 14,
+                offensiveEfficiency: 122.6,
+                defensiveEfficiency: 96.9, 
+                recentForm: 6,               // Subjective: Average recent performance
+                injuryImpact: 8,             // Subjective: Minor injury concerns
+                tournamentExperience: 8,     // Subjective: Good tournament history
+                region: "East"
+            },
+            "Purdue": {
+                kenpomRank: 18,
+                offensiveEfficiency: 124.3,
+                defensiveEfficiency: 100.7,
+                recentForm: 7,               // Subjective: Solid recent performance
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 8,     // Subjective: Good tournament history
                 region: "Midwest"
             },
-            "Gonzaga": {
-                kenpomRank: 15,
-                offensiveEfficiency: 118.7,
-                defensiveEfficiency: 96.4,
-                recentForm: 8,
-                injuryImpact: 9,
-                tournamentExperience: 10,
+            "Maryland": {
+                kenpomRank: 26,
+                offensiveEfficiency: 115.7,
+                defensiveEfficiency: 95.8, 
+                recentForm: 7,               // Subjective: Solid recent performance
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 8,     // Subjective: Good tournament history
                 region: "West"
             },
+            "Texas A&M": {
+                kenpomRank: 17,
+                offensiveEfficiency: 116.2,
+                defensiveEfficiency: 92.1, 
+                recentForm: 5,               // Subjective: One-and-done in conference tournament
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 7,     // Subjective: Moderate tournament history
+                region: "South"
+            },
+            
+            // 5 Seeds
             "Oregon": {
-                kenpomRank: 22,
-                offensiveEfficiency: 114.6,
-                defensiveEfficiency: 97.2,
-                recentForm: 7,
-                injuryImpact: 9,
-                tournamentExperience: 7,
+                kenpomRank: 32,
+                offensiveEfficiency: 116.7,
+                defensiveEfficiency: 96.6, 
+                recentForm: 7,               // Subjective: Solid recent performance
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 7,     // Subjective: Moderate tournament history
                 region: "Midwest"
             },
+            "Clemson": {
+                kenpomRank: 19,
+                offensiveEfficiency: 118.7,
+                defensiveEfficiency: 94.9, 
+                recentForm: 7,               // Subjective: 27 wins (most in program history)
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 7,     // Subjective: Made Elite Eight last season
+                region: "Midwest"
+            },
+            "Michigan": {
+                kenpomRank: 24,
+                offensiveEfficiency: 116.1,
+                defensiveEfficiency: 93.7, 
+                recentForm: 8,               // Subjective: Won Big Ten Tournament
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 8,     // Subjective: Good tournament history
+                region: "South"
+            },
+            "Memphis": {
+                kenpomRank: 50,
+                offensiveEfficiency: 113.3,
+                defensiveEfficiency: 97.8, 
+                recentForm: 7,               // Subjective: Solid recent performance
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 7,     // Subjective: Moderate tournament history
+                region: "West"
+            },
+            
+            // Other notable teams
+            "Gonzaga": {
+                kenpomRank: 9,
+                offensiveEfficiency: 123.6,
+                defensiveEfficiency: 96.3, 
+                recentForm: 8,               // Subjective: Strong finish to season
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 10,    // Subjective: Consistent tournament success
+                region: "West"
+            },
+            "BYU": {
+                kenpomRank: 31,
+                offensiveEfficiency: 116.2,
+                defensiveEfficiency: 95.9, 
+                recentForm: 9,               // Subjective: Won 9 of last 10 games
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 6,     // Subjective: Limited recent tournament success
+                region: "West"
+            },
+            "Ole Miss": {
+                kenpomRank: 25,
+                offensiveEfficiency: 117.9,
+                defensiveEfficiency: 95.8, 
+                recentForm: 7,               // Subjective: Defeated Arkansas in the SEC tournament but then lost to Auburn 62-57
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 6,     // Subjective: Limited recent tournament success
+                region: "South"
+            },
+            "Kansas": {
+                kenpomRank: 21,
+                offensiveEfficiency: 116.0,
+                defensiveEfficiency: 92.7, 
+                recentForm: 6,               // Subjective: Average recent performance
+                injuryImpact: 7,             // Subjective: Some injury concerns
+                tournamentExperience: 10,    // Subjective: Elite tournament history
+                region: "East"
+            },
             "UCLA": {
-                kenpomRank: 35,
-                offensiveEfficiency: 111.2,
-                defensiveEfficiency: 95.6,
-                recentForm: 6,
-                injuryImpact: 8,
-                tournamentExperience: 9,
+                kenpomRank: 28,
+                offensiveEfficiency: 116.9,
+                defensiveEfficiency: 95.1, 
+                recentForm: 6,               // Subjective: Average recent performance
+                injuryImpact: 8,             // Subjective: Minor injury concerns
+                tournamentExperience: 9,     // Subjective: Strong tournament history
                 region: "South"
             },
             "North Carolina": {
-                kenpomRank: 32,
-                offensiveEfficiency: 112.8,
-                defensiveEfficiency: 96.7,
-                recentForm: 5,              // Bubble team
-                injuryImpact: 9,
-                tournamentExperience: 9,
+                kenpomRank: 30,
+                offensiveEfficiency: 119.8,
+                defensiveEfficiency: 99.3, 
+                recentForm: 3,               // Subjective: Poor finish, bubble team
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 9,     // Subjective: Strong tournament history
                 region: "South"
-            }
-        };
+            },
+            "Louisville": {
+                kenpomRank: 27,
+                offensiveEfficiency: 118.1,
+                defensiveEfficiency: 96.3, 
+                recentForm: 8,               // Subjective: Won 11 straight before ACC title game loss
+                injuryImpact: 9,             // Subjective: Reyne Smith returning from ankle injury
+                tournamentExperience: 7,     // Subjective: Moderate tournament history
+                region: "South"
+            },
+            "Creighton": {
+                kenpomRank: 34,
+                offensiveEfficiency: 117.8,
+                defensiveEfficiency: 98.1, 
+                recentForm: 7,               // Subjective: Won 3 in a row before Big East Final loss
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 8,     // Subjective: Good tournament history
+                region: "South"
+            },
+            "Marquette": {
+                kenpomRank: 26, 
+                offensiveEfficiency: 117.8,
+                defensiveEfficiency: 95.9, 
+                recentForm: 7,               // Subjective: Solid recent performance
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 8,     // Subjective: Good tournament history
+                region: "South"
+            },
+            "UCF": {
+                kenpomRank: 68,
+                offensiveEfficiency: 115.5,
+                defensiveEfficiency: 103.8,
+                recentForm: 6,               // Subjective: Average recent performance
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 5,     // Subjective: Limited tournament history
+                region: "Midwest"
+            },
+            "Illinois": {
+                kenpomRank: 12,
+                offensiveEfficiency: 125.4,
+                defensiveEfficiency: 100.9,
+                recentForm: 7,               // Subjective: Solid recent performance
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 8,     // Subjective: Good tournament history
+                region: "East"
+            },
+            "McNeese": {
+                kenpomRank: 59,
+                offensiveEfficiency: 114.3,
+                defensiveEfficiency: 100.5,
+                recentForm: 8,               // Subjective: Strong mid-major performance
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 3,     // Subjective: Limited tournament history
+                region: "South"
+            },
+            "Drake": {
+                kenpomRank: 58,
+                offensiveEfficiency: 112.8,
+                defensiveEfficiency: 98.5, 
+                recentForm: 8,               // Subjective: Strong mid-major performance
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 5,     // Subjective: Limited tournament history
+                region: "Midwest"
+            },
+            "Liberty": {
+                kenpomRank: 60,
+                offensiveEfficiency: 112.6,
+                defensiveEfficiency: 98.9, 
+                recentForm: 8,               // Subjective: Strong mid-major performance
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 5,     // Subjective: Limited tournament history
+                region: "Midwest"
+            },
+            "Georgia": {
+                kenpomRank: 36,
+                offensiveEfficiency: 115.4,
+                defensiveEfficiency: 96.1, 
+                recentForm: 6,               // Subjective: Average recent performance
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 4,     // Subjective: Limited tournament history
+                region: "West"
+            },
+            "VCU": {
+                kenpomRank: 31,
+                offensiveEfficiency: 116.2,
+                defensiveEfficiency: 95.9, 
+                recentForm: 8,               // Subjective: Strong recent performance
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 8,     // Subjective: Good tournament history
+                region: "West"
+            },
+            "Yale": {
+                kenpomRank: 74,
+                offensiveEfficiency: 115.2,
+                defensiveEfficiency: 104.1,
+                recentForm: 8,               // Subjective: Strong Ivy League performance
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 4,     // Subjective: Limited tournament history
+                region: "East"
+            },
+            "Vanderbilt": {
+                kenpomRank: 47,
+                offensiveEfficiency: 117.9,
+                defensiveEfficiency: 101.8,
+                recentForm: 7,               // Subjective: Solid recent performance
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 6,     // Subjective: Moderate tournament history
+                region: "West"
+            },
+            "UConn": {
+                kenpomRank: 8,
+                offensiveEfficiency: 121.2,
+                defensiveEfficiency: 102.4,
+                recentForm: 6,               // Subjective: Average recent performance
+                injuryImpact: 8,             // Subjective: Some injury concerns
+                tournamentExperience: 10,    // Subjective: Defending champions
+                region: "Midwest"
+            },
+            "Nebraska": {
+                kenpomRank: 54,
+                offensiveEfficiency: 113.3,
+                defensiveEfficiency: 98.4, 
+                recentForm: 6,               // Subjective: Average recent performance
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 3,     // Subjective: Limited tournament history
+                region: "East"
+            },
+            "Mississippi St.": {
+                kenpomRank: 8,
+                offensiveEfficiency: 118.2,
+                defensiveEfficiency: 90.6, 
+                recentForm: 5,               // Subjective: Average recent performance  
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 6,     // Subjective: Moderate tournament history
+                region: "South"
+            },
+            "Baylor": {
+                kenpomRank: 9,
+                offensiveEfficiency: 120.9,
+                defensiveEfficiency: 99.7, 
+                recentForm: 5,               // Subjective: Average recent performance
+                injuryImpact: 7,             // Subjective: Some injury concerns
+                tournamentExperience: 9,     // Subjective: Recent national champion
+                region: "East"
+            },
+            "High Point": {
+                kenpomRank: 84,
+                offensiveEfficiency: 118.5,
+                defensiveEfficiency: 109.9,
+                recentForm: 9,               // Subjective: Won conference tournament
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 1,     // Subjective: First NCAA tournament
+                region: "Midwest"
+            },
+            "Montana": {
+                kenpomRank: 161,
+                offensiveEfficiency: 110.8,
+                defensiveEfficiency: 110.5,
+                recentForm: 8,               // Subjective: Won conference tournament
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 3,     // Subjective: Limited tournament history
+                region: "West"
+            },
+            "SIU Edwardsville": {
+                kenpomRank: 179,             // Estimated from position in KenPom rankings
+                offensiveEfficiency: 107.5,  // Estimated from similar ranked teams
+                defensiveEfficiency: 108.0,  // Estimated from similar ranked teams
+                recentForm: 8,               // Subjective: Won conference tournament
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 1,     // Subjective: First NCAA tournament
+                region: "South"
+            },
+            "Alabama State": {
+                kenpomRank: 301,             // Estimated from position in KenPom rankings
+                offensiveEfficiency: 101.2,  // Estimated from similar ranked teams
+                defensiveEfficiency: 110.8,  // Estimated from similar ranked teams
+                recentForm: 8,               // Subjective: Won conference tournament
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 2,     // Subjective: Limited tournament history
+                region: "Midwest"
+            },
+            "Troy": {
+                kenpomRank: 93,
+                offensiveEfficiency: 107.8,
+                defensiveEfficiency: 100.6,
+                recentForm: 8,               // Subjective: Won conference tournament
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 2,     // Subjective: Limited tournament history
+                region: "South"
+            },
+            "Grand Canyon": {
+                kenpomRank: 96,
+                offensiveEfficiency: 110.7,
+                defensiveEfficiency: 100.7,
+                recentForm: 8,               // Subjective: Won conference tournament
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 3,     // Subjective: Limited tournament history
+                region: "West"
+            },
+            "Norfolk State": {
+                kenpomRank: 179,
+                offensiveEfficiency: 107.2,
+                defensiveEfficiency: 108.7,
+                recentForm: 8,               // Subjective: Won conference tournament
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 3,     // Subjective: Limited tournament history
+                region: "West"
+            },
+            "Omaha": {
+                kenpomRank: 181,             // Estimated from position in KenPom rankings
+                offensiveEfficiency: 106.9,  // Estimated from similar ranked teams
+                defensiveEfficiency: 109.3,  // Estimated from similar ranked teams
+                recentForm: 8,               // Subjective: Won conference tournament
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 1,     // Subjective: First NCAA tournament
+                region: "South"
+            },
+            "UC San Diego": {
+                kenpomRank: 37,
+                offensiveEfficiency: 115.1,
+                defensiveEfficiency: 96.7, 
+                recentForm: 8,               // Subjective: Strong recent performance
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 1,     // Subjective: First NCAA tournament
+                region: "East"
+            },
+            "Wofford": {
+                kenpomRank: 122,
+                offensiveEfficiency: 113.6,
+                defensiveEfficiency: 109.5,
+                recentForm: 8,               // Subjective: Won conference tournament
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 5,     // Subjective: Some tournament history
+                region: "East"
+            },
+            "Arkansas": {
+                kenpomRank: 41,
+                offensiveEfficiency: 113.0,
+                defensiveEfficiency: 95.3, 
+                recentForm: 4,               // Subjective: Underwhelming season
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 8,     // Subjective: Good tournament history
+                region: "East"
+            },
+            "Xavier": {
+                kenpomRank: 40,
+                offensiveEfficiency: 116.3,
+                defensiveEfficiency: 98.6, 
+                recentForm: 7,               // Subjective: Solid recent performance
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 8,     // Subjective: Good tournament history
+                region: "East"
+            },
+            "Bryant": {
+                kenpomRank: 148,
+                offensiveEfficiency: 110.8,  // Estimated from KenPom range
+                defensiveEfficiency: 110.0,  // Estimated from KenPom range
+                recentForm: 8,               // Subjective: Won conference tournament
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 2,     // Subjective: Limited tournament history
+                region: "Midwest"
+            },
+            "Mount St. Mary's": {
+                kenpomRank: 238,
+                offensiveEfficiency: 101.1,
+                defensiveEfficiency: 107.1,
+                recentForm: 8,               // Subjective: Won conference tournament
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 3,     // Subjective: Limited tournament history
+                region: "East"
+            },
+            "Missouri": {
+                kenpomRank: 15,
+                offensiveEfficiency: 124.2,
+                defensiveEfficiency: 100.7,
+                recentForm: 7,               // Subjective: Solid recent performance
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 6,     // Subjective: Moderate tournament history
+                region: "Midwest"
+            },
+            "Robert Morris": {
+                kenpomRank: 138,             // Estimated from position in KenPom rankings
+                offensiveEfficiency: 111.2,  // Estimated from similar ranked teams
+                defensiveEfficiency: 111.0,  // Estimated from similar ranked teams
+                recentForm: 8,               // Subjective: Won conference tournament
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 2,     // Subjective: Limited tournament history
+                region: "West"
+            },
+            "Lipscomb": {
+                kenpomRank: 82,
+                offensiveEfficiency: 112.8,
+                defensiveEfficiency: 103.3,
+                recentForm: 8,               // Subjective: Won conference tournament
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 2,     // Subjective: Limited tournament history
+                region: "East"
+            },
+            "Colorado State": {
+                kenpomRank: 43,
+                offensiveEfficiency: 116.1,
+                defensiveEfficiency: 99.2, 
+                recentForm: 6,               // Subjective: Average recent performance
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 5,     // Subjective: Some tournament history
+                region: "West"
+            },
+            "Saint Mary's": {
+                kenpomRank: 22,
+                offensiveEfficiency: 115.4,
+                defensiveEfficiency: 92.2, 
+                recentForm: 7,               // Subjective: Solid recent performance
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 7,     // Subjective: Moderate tournament history
+                region: "West"
+            },
+            "Akron": {
+                kenpomRank: 98,
+                offensiveEfficiency: 113.9,
+                defensiveEfficiency: 107.0,
+                recentForm: 8,               // Subjective: Won conference tournament
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 4,     // Subjective: Some tournament history
+                region: "South"
+            },
+            "New Mexico": {
+                kenpomRank: 42,
+                offensiveEfficiency: 112.4,
+                defensiveEfficiency: 95.4, 
+                recentForm: 6,               // Subjective: Average recent performance
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 5,     // Subjective: Some tournament history
+                region: "Midwest"
+            },
+            "Utah State": {
+                kenpomRank: 10,
+                offensiveEfficiency: 119.0,
+                defensiveEfficiency: 100.7,
+                recentForm: 7,               // Subjective: Solid recent performance
+                injuryImpact: 9,             // Subjective: Team largely healthy
+                tournamentExperience: 6,     // Subjective: Moderate tournament history
+                region: "South"
+            },
+            "Oklahoma": {
+                kenpomRank: 39,
+        	   offensiveEfficiency: 119.0,
+        	   defensiveEfficiency: 100.7,
+        	   recentForm: 5,               // Subjective: Bubble team
+        	   injuryImpact: 9,             // Subjective: Team largely healthy
+        	   tournamentExperience: 6,     // Subjective: Moderate tournament history
+        	   region: "Midwest"
+        	},
+        	"Penn St.": {
+        	   kenpomRank: 61,
+        	   offensiveEfficiency: 114.7,
+        	   defensiveEfficiency: 101.1,
+        	   recentForm: 6,               // Subjective: Average recent performance
+        	   injuryImpact: 9,             // Subjective: Team largely healthy
+        	   tournamentExperience: 5,     // Subjective: Some tournament history
+        	   region: "East"
+        	},
+        	"Indiana": {
+        	   kenpomRank: 46,
+        	   offensiveEfficiency: 113.7,
+        	   defensiveEfficiency: 97.5, 
+        	   recentForm: 6,               // Subjective: Average recent performance
+        	   injuryImpact: 8,             // Subjective: Some injury concerns
+        	   tournamentExperience: 8,     // Subjective: Good tournament history
+        	   region: "Midwest"
+        	},
+        	"Northwestern": {
+        	   kenpomRank: 45,
+        	   offensiveEfficiency: 114.0,
+        	   defensiveEfficiency: 97.6, 
+        	   recentForm: 6,               // Subjective: Average recent performance
+        	   injuryImpact: 8,             // Subjective: Some injury concerns
+        	   tournamentExperience: 5,     // Subjective: Limited tournament history
+        	   region: "South"
+        	},
+        	"Rutgers": {
+        	   kenpomRank: 76,
+        	   offensiveEfficiency: 115.2,
+        	   defensiveEfficiency: 104.4,
+        	   recentForm: 5,               // Subjective: Average recent performance
+        	   injuryImpact: 9,             // Subjective: Team largely healthy
+        	   tournamentExperience: 5,     // Subjective: Some tournament history
+        	   region: "Midwest"
+        	},
+        	"UNC Wilmington": {
+        	   kenpomRank: 105,
+        	   offensiveEfficiency: 112.4,
+        	   defensiveEfficiency: 107.2,
+        	   recentForm: 8,               // Subjective: Won conference tournament
+        	   injuryImpact: 9,             // Subjective: Team largely healthy
+        	   tournamentExperience: 3,     // Subjective: Limited tournament history
+        	   region: "Midwest"
+        	};;
 
         // Function to get team data for a team (or generate defaults based on seed)
         function getTeamData(teamName) {
@@ -303,9 +794,9 @@
             const seed1 = parseInt(team1.seed);
             const seed2 = parseInt(team2.seed);
             
-            // Get team data (either from defined data or defaults)
-            const team1Data = getTeamData(team1.name);
-            const team2Data = getTeamData(team2.name);
+            // Access team data directly from teamData object
+            const team1Data = teamData[team1.name];
+            const team2Data = teamData[team2.name];
             
             // Historical upset rates by seed matchup and round
             const historicalUpsetRates = {
