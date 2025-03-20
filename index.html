@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>March Madness Bracket Predictor</title>
+    <script src="https://res.cdn.office.net/teams-js/2.0.0/js/MicrosoftTeams.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #6264A7;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            display: block;
+            margin: 20px auto;
+        }
+        button:hover {
+            background-color: #4b4c8c;
+        }
+        .results {
+            margin-top: 20px;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        .round {
+            margin-bottom: 15px;
+        }
+        .round-title {
+            font-weight: bold;
+            color: #6264A7;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .matchup {
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+        }
+        .winner {
+            font-weight: bold;
+            color: #107C10;
+        }
+        .champion {
+            text-align: center;
+            font-size: 24px;
+            margin: 30px 0;
+            font-weight: bold;
+            color: #107C10;
+            padding: 20px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+        .team-data {
+            margin-top: 30px;
+        }
+        .save-button {
+            background-color: #107C10;
+        }
+        .save-button:hover {
+            background-color: #0b5e0b;
+        }
+        #loading {
+            text-align: center;
+            display: none;
+            margin: 20px 0;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #6264A7;
+            animation: spin 1s ease infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>March Madness Bracket Predictor 2025</h1>
+        
+        <button id="simulateButton">Simulate Tournament</button>
+        
+        <div id="loading">
+            <div class="spinner"></div>
+            <p>Running simulation...</p>
+        </div>
+        
+        <div id="results" class="results"></div>
+        
+        <button id="saveButton" class="save-button" style="display: none;">Save Results</button>
+    </div>
+
+    <script>
+        // Initialize Teams SDK
+        microsoftTeams.initialize();
+        
+        // Team data with statistics based on KenPom and other metrics
+        const teamData = {
+            // 1 Seeds
+            "Houston": {
+                kenpomRank: 3,
+                offensiveEfficiency: 118.2, // Top 15
+                defensiveEfficiency: 87.1,  // Top 3
+                recentForm: 9,              // Scale 1-10
+                injuryImpact: 9,            // Scale 1-10 (10 = fully healthy)
+                tournamentExperience: 9,    // Scale 1-10
+                region: "Midwest"
+            },
+            "Auburn": {
+                kenpomRank: 2,
+                offensiveEfficiency: 120.8, // Top 5
+                defensiveEfficiency: 89.4,  // Top 10
+                recentForm: 6,              // Lost 3 of last 4 before tournament
+                injuryImpact: 9,            
+                tournamentExperience: 7,
+                region: "South"
+            },
+            "Duke": {
+                kenpomRank: 1,
+                offensiveEfficiency: 122.1, // Top 3
+                defensiveEfficiency: 88.7,  // Top 5
+                recentForm: 9,              // Very strong recent performance
+                injuryImpact: 6,            // Cooper Flagg ankle injury
+                tournamentExperience: 10,
+                region: "East"
+            },
+            "Florida": {
+                kenpomRank: 4,
+                offensiveEfficiency: 123.4, // #1 in KenPom
+                defensiveEfficiency: 91.8,  // Top 15
+                recentForm: 8,
+                injuryImpact: 9,
+                tournamentExperience: 7,
+                region: "West"
+            },
+            
+            // 2 Seeds
+            "Tennessee": {
+                kenpomRank: 5,
+                offensiveEfficiency: 115.4, // Top 25
+                defensiveEfficiency: 85.9,  // #1 in KenPom
+                recentForm: 7,
+                injuryImpact: 8,
+                tournamentExperience: 8,
+                region: "East"
+            },
+            "Alabama": {
+                kenpomRank: 7,
+                offensiveEfficiency: 126.2, // Best offense (91 ppg)
+                defensiveEfficiency: 100.5, // Very poor defense
+                recentForm: 6,              // Lost 2 in a row before tournament
+                injuryImpact: 9,
+                tournamentExperience: 9,
+                region: "West"
+            },
+            "Michigan State": {
+                kenpomRank: 8,
+                offensiveEfficiency: 116.8,
+                defensiveEfficiency: 93.4,
+                recentForm: 8,              // Strong finish to season
+                injuryImpact: 9,
+                tournamentExperience: 10,   // Izzo in March
+                region: "Midwest"
+            },
+            "St. John's": {
+                kenpomRank: 11,
+                offensiveEfficiency: 114.7,
+                defensiveEfficiency: 93.7,
+                recentForm: 9,              // 30-4 overall, 18-2 in Big East
+                injuryImpact: 9,
+                tournamentExperience: 7,
+                region: "South"
+            },
+            
+            // Other notable teams
+            "Wisconsin": {
+                kenpomRank: 12,
+                offensiveEfficiency: 117.1,
+                defensiveEfficiency: 93.4,
+                recentForm: 7,
+                injuryImpact: 8,
+                tournamentExperience: 8,
+                region: "West"
+            },
+            "Iowa State": {
+                kenpomRank: 6,
+                offensiveEfficiency: 115.8,
+                defensiveEfficiency: 90.1,  // Top 10
+                recentForm: 8,
+                injuryImpact: 6,            // Gilbert injury
+                tournamentExperience: 8,
+                region: "South"
+            },
+            "Kentucky": {
+                kenpomRank: 14,
+                offensiveEfficiency: 119.2,
+                defensiveEfficiency: 97.3,
+                recentForm: 6,
+                injuryImpact: 9,
+                tournamentExperience: 9,
+                region: "South"
+            },
+            "Texas Tech": {
+                kenpomRank: 10,
+                offensiveEfficiency: 119.5,
+                defensiveEfficiency: 95.1,
+                recentForm: 7,              // Beat Houston
+                injuryImpact: 9,
+                tournamentExperience: 7,
+                region: "Midwest"
+            },
+            "Gonzaga": {
+                kenpomRank: 15,
+                offensiveEfficiency: 118.7,
+                defensiveEfficiency: 96.4,
+                recentForm: 8,
+                injuryImpact: 9,
+                tournamentExperience: 10,
+                region: "West"
+            },
+            "Oregon": {
+                kenpomRank: 22,
+                offensiveEfficiency: 114.6,
+                defensiveEfficiency: 97.2,
+                recentForm: 7,
+                injuryImpact: 9,
+                tournamentExperience: 7,
+                region: "Midwest"
+            },
+            "UCLA": {
+                kenpomRank: 35,
+                offensiveEfficiency: 111.2,
+                defensiveEfficiency: 95.6,
+                recentForm: 6,
+                injuryImpact: 8,
+                tournamentExperience: 9,
+                region: "South"
+            },
+            "North Carolina": {
+                kenpomRank: 32,
+                offensiveEfficiency: 112.8,
+                defensiveEfficiency: 96.7,
+                recentForm: 5,              // Bubble team
+                injuryImpact: 9,
+                tournamentExperience: 9,
+                region: "South"
+            }
+        };
+
+        // Function to get team data for a team (or generate defaults based on seed)
+        function getTeamData(teamName) {
+            if (teamData[teamName]) {
+                return teamData[teamName];
+            }
+            
+            // Default values based on seed
+            const seedMatch = teamName.match(/\((\d+)\)/);
+            const seed = seedMatch ? parseInt(seedMatch[1]) : 10; // Default to 10 if no seed found
+            
+            return {
+                kenpomRank: 50 + (seed * 5),  // Estimate based on seed
+                offensiveEfficiency: 110 - (seed * 0.8),
+                defensiveEfficiency: 95 + (seed * 0.7),
+                recentForm: 7,
+                injuryImpact: 9,
+                tournamentExperience: 6,
+                region: "Unknown"
+            };
+        }
+        
+        // Function to predict winner between two teams
+        function predictWinner(team1, team2) {
+            const seed1 = parseInt(team1.seed);
+            const seed2 = parseInt(team2.seed);
+            
+            // Get team data (either from defined data or defaults)
+            const team1Data = getTeamData(team1.name);
+            const team2Data = getTeamData(team2.name);
+            
+            // Calculate base win probability using seed difference
+            let seedDifference = Math.abs(seed1 - seed2);
+            
+            // Base probability calculation considering seed difference
+            let baseProbability;
+            if (seed1 < seed2) {
+                // Team1 is the higher seed (lower number)
+                baseProbability = 0.5 + (seedDifference * 0.05);
+            } else if (seed2 < seed1) {
+                // Team2 is the higher seed (lower number)
+                baseProbability = 0.5 - (seedDifference * 0.05);
+            } else {
+                // Same seed
+                baseProbability = 0.5;
+            }
+            
+            // Adjust by round - deeper rounds favor better seeds
+            const roundFactor = team1.round * 0.01; // Increases importance of seed as tournament progresses
+            baseProbability += (seed1 < seed2) ? roundFactor : -roundFactor;
+            
+            // Adjust for team quality factors from KenPom and other metrics
+            
+            // 1. Offensive-Defensive Efficiency Balance
+            const team1EfficiencyDiff = team1Data.offensiveEfficiency - team1Data.defensiveEfficiency;
+            const team2EfficiencyDiff = team2Data.offensiveEfficiency - team2Data.defensiveEfficiency;
+            const efficiencyAdvantage = (team1EfficiencyDiff - team2EfficiencyDiff) * 0.003;
+            
+            // 2. KenPom Ranking Difference
+            const kenpomDiff = (team2Data.kenpomRank - team1Data.kenpomRank) * 0.002;
+            
+            // 3. Recent Form
+            const formAdvantage = (team1Data.recentForm - team2Data.recentForm) * 0.01;
+            
+            // 4. Injury Impact
+            const injuryAdvantage = (team1Data.injuryImpact - team2Data.injuryImpact) * 0.015;
+            
+            // 5. Tournament Experience
+            const expAdvantage = (team1Data.tournamentExperience - team2Data.tournamentExperience) * 0.008;
+            
+            // Calculate final probability
+            let finalProbability = baseProbability + efficiencyAdvantage + kenpomDiff + formAdvantage + 
+                                injuryAdvantage + expAdvantage;
+            
+            // Add a smaller random factor for unpredictability (March Madness!)
+            const randomFactor = (Math.random() * 0.15) - 0.075; // ±7.5%
+            finalProbability += randomFactor;
+            
+            // Ensure probability stays between 0 and 1
+            finalProbability = Math.max(0.02, Math.min(0.98, finalProbability));
+            
+            // Add a slight adjustment for 12-5, 11-6, 10-7 matchups which historically have more upsets
+            if (team1.round === 1) {
+                if ((seed1 === 5 && seed2 === 12) || (seed1 === 12 && seed2 === 5)) {
+                    // Adjust toward the 12 seed slightly
+                    finalProbability = (seed1 === 5) ? finalProbability - 0.08 : finalProbability + 0.08;
+                } else if ((seed1 === 6 && seed2 === 11) || (seed1 === 11 && seed2 === 6)) {
+                    // Adjust toward the 11 seed slightly
+                    finalProbability = (seed1 === 6) ? finalProbability - 0.07 : finalProbability + 0.07;
+                } else if ((seed1 === 7 && seed2 === 10) || (seed1 === 10 && seed2 === 7)) {
+                    // Adjust toward the 10 seed slightly
+                    finalProbability = (seed1 === 7) ? finalProbability - 0.05 : finalProbability + 0.05;
+                }
+            }
+            
+            // Simulate the game
+            return Math.random() < finalProbability ? team1 : team2;
+        }
+        
+        // Define the tournament brackets
+        const roundOf64 = [
+            // First Round - Thursday
+            {name: "Louisville", seed: "8", region: "East", round: 1},
+            {name: "Creighton", seed: "9", region: "East", round: 1},
+            {name: "Purdue", seed: "4", region: "Midwest", round: 1},
+            {name: "High Point", seed: "13", region: "Midwest", round: 1},
+            {name: "Wisconsin", seed: "3", region: "West", round: 1},
+            {name: "Montana", seed: "14", region: "West", round: 1},
+            {name: "Houston", seed: "1", region: "South", round: 1},
+            {name: "SIU Edwardsville", seed: "16", region: "South", round: 1},
+            {name: "Auburn", seed: "1", region: "Midwest", round: 1},
+            {name: "Alabama State", seed: "16", region: "Midwest", round: 1},
+            {name: "Clemson", seed: "5", region: "South", round: 1},
+            {name: "McNeese", seed: "12", region: "South", round: 1},
+            {name: "BYU", seed: "6", region: "West", round: 1},
+            {name: "VCU", seed: "11", region: "West", round: 1},
+            {name: "Gonzaga", seed: "8", region: "West", round: 1},
+            {name: "Georgia", seed: "9", region: "West", round: 1},
+            {name: "Tennessee", seed: "2", region: "East", round: 1},
+            {name: "Wofford", seed: "15", region: "East", round: 1},
+            {name: "Kansas", seed: "7", region: "East", round: 1},
+            {name: "Arkansas", seed: "10", region: "East", round: 1},
+            {name: "Texas A&M", seed: "4", region: "East", round: 1},
+            {name: "Yale", seed: "13", region: "East", round: 1},
+            {name: "Missouri", seed: "6", region: "Midwest", round: 1},
+            {name: "Drake", seed: "11", region: "Midwest", round: 1},
+            {name: "UCLA", seed: "7", region: "South", round: 1},
+            {name: "Utah State", seed: "10", region: "South", round: 1},
+            {name: "St. John's", seed: "2", region: "South", round: 1},
+            {name: "Omaha", seed: "15", region: "South", round: 1},
+            {name: "Michigan", seed: "5", region: "East", round: 1},
+            {name: "UC San Diego", seed: "12", region: "East", round: 1},
+            {name: "Texas Tech", seed: "3", region: "Midwest", round: 1},
+            {name: "UNC Wilmington", seed: "14", region: "Midwest", round: 1},
+            
+            // First Round - Friday
+            {name: "Mississippi State", seed: "8", region: "South", round: 1},
+            {name: "Baylor", seed: "9", region: "South", round: 1},
+            {name: "Alabama", seed: "2", region: "West", round: 1},
+            {name: "Robert Morris", seed: "15", region: "West", round: 1},
+            {name: "Iowa State", seed: "3", region: "East", round: 1},
+            {name: "Lipscomb", seed: "14", region: "East", round: 1},
+            {name: "Memphis", seed: "5", region: "West", round: 1},
+            {name: "Colorado State", seed: "12", region: "West", round: 1},
+            {name: "Duke", seed: "1", region: "East", round: 1},
+            {name: "Mount St. Mary's", seed: "16", region: "East", round: 1},
+            {name: "Saint Mary's", seed: "7", region: "West", round: 1},
+            {name: "Vanderbilt", seed: "10", region: "West", round: 1},
+            {name: "Ole Miss", seed: "6", region: "South", round: 1},
+            {name: "North Carolina", seed: "11", region: "South", round: 1},
+            {name: "Maryland", seed: "4", region: "West", round: 1},
+            {name: "Grand Canyon", seed: "13", region: "West", round: 1},
+            {name: "Florida", seed: "1", region: "West", round: 1},
+            {name: "Norfolk State", seed: "16", region: "West", round: 1},
+            {name: "Kentucky", seed: "3", region: "South", round: 1},
+            {name: "Troy", seed: "14", region: "South", round: 1},
+            {name: "Marquette", seed: "7", region: "Midwest", round: 1},
+            {name: "New Mexico", seed: "10", region: "Midwest", round: 1},
+            {name: "Arizona", seed: "4", region: "South", round: 1},
+            {name: "Akron", seed: "13", region: "South", round: 1},
+            {name: "UConn", seed: "8", region: "Midwest", round: 1},
+            {name: "Oklahoma", seed: "9", region: "Midwest", round: 1},
+            {name: "Illinois", seed: "6", region: "East", round: 1},
+            {name: "Xavier", seed: "11", region: "East", round: 1},
+            {name: "Michigan State", seed: "2", region: "Midwest", round: 1},
+            {name: "Bryant", seed: "15", region: "Midwest", round: 1},
+            {name: "Oregon", seed: "5", region: "Midwest", round: 1},
+            {name: "Liberty", seed: "12", region: "Midwest", round: 1}
+        ];
+        
+        // Run the tournament simulation
+        function simulateTournament(initialTeams) {
+            let currentRound = initialTeams;
+            let roundNumber = 1;
+            let results = {
+                roundOf64: [],
+                roundOf32: [],
+                sweet16: [],
+                elite8: [],
+                finalFour: [],
+                championship: [],
+                champion: null
+            };
+            
+            // Round of 64
+            let roundOf32 = [];
+            for (let i = 0; i < currentRound.length; i += 2) {
+                const team1 = currentRound[i];
+                const team2 = currentRound[i + 1];
+                
+                const winner = predictWinner(team1, team2);
+                winner.round = 2; // Update round for winner
+                
+                results.roundOf64.push({
+                    team1: team1.name,
+                    seed1: team1.seed,
+                    team2: team2.name,
+                    seed2: team2.seed,
+                    winner: winner.name,
+                    winnerSeed: winner.seed
+                });
+                
+                roundOf32.push(winner);
+            }
+            
+            // Round of 32
+            let sweet16 = [];
+            for (let i = 0; i < roundOf32.length; i += 2) {
+                const team1 = roundOf32[i];
+                const team2 = roundOf32[i + 1];
+                
+                const winner = predictWinner(team1, team2);
+                winner.round = 3; // Update round for winner
+                
+                results.roundOf32.push({
+                    team1: team1.name,
+                    seed1: team1.seed,
+                    team2: team2.name,
+                    seed2: team2.seed,
+                    winner: winner.name,
+                    winnerSeed: winner.seed
+                });
+                
+                sweet16.push(winner);
+            }
+            
+            // Sweet 16
+            let elite8 = [];
+            for (let i = 0; i < sweet16.length; i += 2) {
+                const team1 = sweet16[i];
+                const team2 = sweet16[i + 1];
+                
+                const winner = predictWinner(team1, team2);
+                winner.round = 4; // Update round for winner
+                
+                results.sweet16.push({
+                    team1: team1.name,
+                    seed1: team1.seed,
+                    team2: team2.name,
+                    seed2: team2.seed,
+                    winner: winner.name,
+                    winnerSeed: winner.seed
+                });
+                
+                elite8.push(winner);
+            }
+            
+            // Elite 8
+            let finalFour = [];
+            for (let i = 0; i < elite8.length; i += 2) {
+                const team1 = elite8[i];
+                const team2 = elite8[i + 1];
+                
+                const winner = predictWinner(team1, team2);
+                winner.round = 5; // Update round for winner
+                
+                results.elite8.push({
+                    team1: team1.name,
+                    seed1: team1.seed,
+                    team2: team2.name,
+                    seed2: team2.seed,
+                    winner: winner.name,
+                    winnerSeed: winner.seed
+                });
+                
+                finalFour.push(winner);
+            }
+            
+            // Final Four
+            let championship = [];
+            for (let i = 0; i < finalFour.length; i += 2) {
+                const team1 = finalFour[i];
+                const team2 = finalFour[i + 1];
+                
+                const winner = predictWinner(team1, team2);
+                winner.round = 6; // Update round for winner
+                
+                results.finalFour.push({
+                    team1: team1.name,
+                    seed1: team1.seed,
+                    team2: team2.name,
+                    seed2: team2.seed,
+                    winner: winner.name,
+                    winnerSeed: winner.seed
+                });
+                
+                championship.push(winner);
+            }
+            
+            // Championship
+            const team1 = championship[0];
+            const team2 = championship[1];
+            
+            const champion = predictWinner(team1, team2);
+            
+            results.championship.push({
+                team1: team1.name,
+                seed1: team1.seed,
+                team2: team2.name,
+                seed2: team2.seed,
+                winner: champion.name,
+                winnerSeed: champion.seed
+            });
+            
+            results.champion = {
+                name: champion.name,
+                seed: champion.seed
+            };
+            
+            return results;
+        }
+        
+        // Function to display the results in a user-friendly way
+        function displayResults(results) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+            
+            // Display Round of 64
+            const round64Div = document.createElement('div');
+            round64Div.className = 'round';
+            round64Div.innerHTML = '<div class="round-title">Round of 64</div>';
+            
+            results.roundOf64.forEach(match => {
+                const matchDiv = document.createElement('div');
+                matchDiv.className = 'matchup';
+                matchDiv.innerHTML = `
+                    ${match.team1} (${match.seed1}) vs ${match.team2} (${match.seed2}) - 
+                    <span class="winner">${match.winner} (${match.winnerSeed}) advances</span>
+                `;
+                round64Div.appendChild(matchDiv);
+            });
+            
+            resultsDiv.appendChild(round64Div);
+            
+            // Display Round of 32
+            const round32Div = document.createElement('div');
+            round32Div.className = 'round';
+            round32Div.innerHTML = '<div class="round-title">Round of 32</div>';
+            
+            results.roundOf32.forEach(match => {
+                const matchDiv = document.createElement('div');
+                matchDiv.className = 'matchup';
+                matchDiv.innerHTML = `
+                    ${match.team1} (${match.seed1}) vs ${match.team2} (${match.seed2}) - 
+                    <span class="winner">${match.winner} (${match.winnerSeed}) advances</span>
+                `;
+                round32Div.appendChild(matchDiv);
+            });
+            
+            resultsDiv.appendChild(round32Div);
+            
+            // Display Sweet 16
+            const sweet16Div = document.createElement('div');
+            sweet16Div.className = 'round';
+            sweet16Div.innerHTML = '<div class="round-title">Sweet 16</div>';
+            
+            results.sweet16.forEach(match => {
+                const matchDiv = document.createElement('div');
+                matchDiv.className = 'matchup';
+                matchDiv.innerHTML = `
+                    ${match.team1} (${match.seed1}) vs ${match.team2} (${match.seed2}) - 
+                    <span class="winner">${match.winner} (${match.winnerSeed}) advances</span>
+                `;
+                sweet16Div.appendChild(matchDiv);
+            });
+            
+            resultsDiv.appendChild(sweet16Div);
+            
+            // Display Elite 8
+            const elite8Div = document.createElement('div');
+            elite8Div.className = 'round';
+            elite8Div.innerHTML = '<div class="round-title">Elite 8</div>';
+            
+            results.elite8.forEach(match => {
+                const matchDiv = document.createElement('div');
+                matchDiv.className = 'matchup';
+                matchDiv.innerHTML = `
+                    ${match.team1} (${match.seed1}) vs ${match.team2} (${match.seed2}) - 
+                    <span class="winner">${match.winner} (${match.winnerSeed}) advances</span>
+                `;
+                elite8Div.appendChild(matchDiv);
+            });
+            
+            resultsDiv.appendChild(elite8Div);
+            
+            // Display Final Four
+            const finalFourDiv = document.createElement('div');
+            finalFourDiv.className = 'round';
+            finalFourDiv.innerHTML = '<div class="round-title">Final Four</div>';
+            
+            results.finalFour.forEach(match => {
+                const matchDiv = document.createElement('div');
+                matchDiv.className = 'matchup';
+                matchDiv.innerHTML = `
+                    ${match.team1} (${match.seed1}) vs ${match.team2} (${match.seed2}) - 
+                    <span class="winner">${match.winner} (${match.winnerSeed}) advances</span>
+                `;
+                finalFourDiv.appendChild(matchDiv);
+            });
+            
+            resultsDiv.appendChild(finalFourDiv);
+            
+            // Display Championship
+            const championshipDiv = document.createElement('div');
+            championshipDiv.className = 'round';
+            championshipDiv.innerHTML = '<div class="round-title">Championship</div>';
+            
+            results.championship.forEach(match => {
+                const matchDiv = document.createElement('div');
+                matchDiv.className = 'matchup';
+                matchDiv.innerHTML = `
+                    ${match.team1} (${match.seed1}) vs ${match.team2} (${match.seed2}) - 
+                    <span class="winner">${match.winner} (${match.winnerSeed}) is the 2025 NCAA Champion!</span>
+                `;
+                championshipDiv.appendChild(matchDiv);
+            });
+            
+            resultsDiv.appendChild(championshipDiv);
+            
+            // Display Champion
+            const championDiv = document.createElement('div');
+            championDiv.className = 'champion';
+            championDiv.innerHTML = `
+                🏆 ${results.champion.name} (${results.champion.seed}) 
+                <br>2025 NCAA Tournament Champion
+            `;
+            
+            resultsDiv.appendChild(championDiv);
+            
+            // Show save button
+            document.getElementById('saveButton').style.display = 'block';
+        }
+        
+        // Event listeners
+        document.getElementById('simulateButton').addEventListener('click', function() {
+            // Show loading spinner
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('saveButton').style.display = 'none';
+            
+            // Use setTimeout to allow the UI to update before running the simulation
+            setTimeout(function() {
+                // Run simulation
+                const results = simulateTournament(JSON.parse(JSON.stringify(roundOf64))); // Deep clone
+                
+                // Display results
+                displayResults(results);
+                
+                // Hide loading spinner
+                document.getElementById('loading').style.display = 'none';
+            }, 100);
+        });
+        
+        document.getElementById('saveButton').addEventListener('click', function() {
+            // Save results functionality for Teams
+            // For demonstration, we'll just alert the user
+            microsoftTeams.dialog.submit("Bracket prediction saved!");
+        });
+    </script>
+</body>
+</html>
