@@ -10,18 +10,19 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #f5f5f5;
+            background-color: #121212;
+            color: #e0e0e0;
         }
         .container {
+            background-color: #1e1e1e;
             max-width: 1200px;
             margin: 0 auto;
-            background-color: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
         }
         h1 {
-            color: #333;
+            color: #bb86fc;
             text-align: center;
             margin-bottom: 20px;
         }
@@ -49,19 +50,20 @@
         }
         .round-title {
             font-weight: bold;
-            color: #6264A7;
+            color: #bb86fc;
             margin-bottom: 10px;
             font-size: 18px;
         }
         .matchup {
-            background-color: #f9f9f9;
+            background-color: #2d2d2d;
+            color: #e0e0e0;
             padding: 10px;
             margin-bottom: 5px;
             border-radius: 4px;
         }
         .winner {
             font-weight: bold;
-            color: #107C10;
+            color: #03dac6;
         }
         .champion {
             text-align: center;
@@ -70,7 +72,8 @@
             font-weight: bold;
             color: #107C10;
             padding: 20px;
-            background-color: #f0f0f0;
+            background-color: #2d2d2d;
+            color: #03dac6;
             border-radius: 4px;
         }
         .team-data {
@@ -99,6 +102,15 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+        table th {
+            background-color: #2d2d2d !important;
+            color: #bb86fc !important;
+            border-color: #444 !important;
+        }
+        table td {
+            border-color: #444 !important;
+            color: #e0e0e0 !important;
         }
     </style>
 </head>
@@ -758,10 +770,10 @@
                 
                 // Later rounds - probability that lower seed wins
                 "R32": 0.38,    // ~38% in Round of 32
-                "S16": 0.34,    // ~34% in Sweet 16
-                "E8": 0.30,     // ~30% in Elite 8
-                "F4": 0.30,     // ~30% in Final Four
-                "NCG": 0.25     // ~25% in Championship
+                "S16": 0.38,    // ~34% in Sweet 16
+                "E8": 0.36,     // ~30% in Elite 8
+                "F4": 0.40,     // ~30% in Final Four
+                "NCG": 0.45     // ~25% in Championship
             };
             
             // Determine base probability from historical matchup data
@@ -815,7 +827,8 @@
             const efficiencyAdvantage = (team1EfficiencyDiff - team2EfficiencyDiff) * 0.003;
             
             // 2. KenPom Ranking Difference
-            const kenpomDiff = (team2Data.kenpomRank - team1Data.kenpomRank) * 0.002;
+            const kenpomFactor = [0.002, 0.002, 0.0015, 0.001, 0.0005, 0.0005][team1.round - 1] || 0.0005; // // Reduce KenPom impact in later rounds
+            const kenpomDiff = (team2Data.kenpomRank - team1Data.kenpomRank) * kenpomFactor;
             
             // 3. Recent Form
             const formAdvantage = (team1Data.recentForm - team2Data.recentForm) * 0.01;
@@ -832,9 +845,77 @@
             
             // Add a random factor for unpredictability (March Madness!)
             // Random factor varies by round - early rounds are more chaotic
-            const randomFactorMagnitude = [0.15, 0.12, 0.10, 0.08, 0.06, 0.05][team1.round - 1] || 0.05;
+            const randomFactorMagnitude = [0.15, 0.12, 0.10, 0.10, 0.12, 0.15][team1.round - 1] || 0.15;
             const randomFactor = (Math.random() * randomFactorMagnitude * 2) - randomFactorMagnitude;
             finalProbability += randomFactor;
+
+            // Constrain the Round of 64 upset rates to historical levels
+            if (team1.round === 1) {
+                const matchupKey = (seed1 < seed2) ? `${seed1}-${seed2}` : `${seed2}-${seed1}`;
+                if (matchupKey === "1-16") {
+                    // Make 1-16 upsets even rarer
+                    if (seed1 === 1) finalProbability += 0.5;
+                    else if (seed2 === 1) finalProbability -= 0.5;
+                }
+                // Fix 2-15 matchups to historical ~8-9%%
+                else if (matchupKey === "2-15") {
+                    if (seed1 === 2) finalProbability -= 0.385;
+                    else if (seed2 === 2) finalProbability += 0.385;
+                }
+                // Fix 3-14 matchups to historical ~15-16%%
+                else if (matchupKey === "3-14") {
+                    if (seed1 === 3) finalProbability -= 0.285;
+                    else if (seed2 === 3) finalProbability += 0.285;
+                }
+                // Fix 3-14 matchups to historical ~20-22%%
+                else if (matchupKey === "4-13") {
+                    if (seed1 === 4) finalProbability -= 0.22;
+                    else if (seed2 === 4) finalProbability += 0.22;
+                }
+                // Fix 5-12 upsets to historical ~35%
+                else if (matchupKey === "5-12") {
+                    
+                    if (seed1 === 5) finalProbability -= 0.08;
+                    else if (seed2 === 5) finalProbability += 0.08;
+                }
+                // Fix 6-11 upsets to historical ~37-40%
+                else if (matchupKey === "6-11") {
+                    
+                    if (seed1 === 6) finalProbability -= 0.075;
+                    else if (seed2 === 6) finalProbability += 0.075;
+                }
+                // Fix 7-10 matchups to historical ~40%
+                else if (matchupKey === "7-10") {
+                    if (seed1 === 7) finalProbability -= 0.075;
+                    else if (seed2 === 7) finalProbability += 0.075;
+                }
+                // Fix 8-9 matchups to be more like 50/50
+                else if (matchupKey === "8-9") {
+                    if (seed1 === 8) finalProbability -= 0.055;
+                    else if (seed2 === 8) finalProbability += 0.055;
+                }
+            }
+
+
+            // Adjust Sweet 16 advancement to favor #1 seeds over #2 seeds
+            if (team1.round === 2) { // Round of 32 games
+                if (seed1 === 1) finalProbability += 0.03;
+                if (seed2 === 1) finalProbability -= 0.03;
+                if (seed1 === 2) finalProbability -= 0.02;
+                if (seed2 === 2) finalProbability += 0.02;
+            }
+
+            // Add a seed-specific adjustment for #2 seeds in later rounds
+            if (seed1 === 2 || seed2 === 2) {
+                // Apply stronger upset probability against #2 seeds in late rounds
+                if (team1.round >= 4) { // Elite 8 and beyond
+                    if (seed1 === 2) {
+                        finalProbability -= 0.08; // Reduce #2 seed's chances
+                    } else if (seed2 === 2) {
+                        finalProbability += 0.08; // Increase chances against #2 seed
+                    }
+                }
+            }
             
             // Ensure probability stays between 0.02 and 0.98
             finalProbability = Math.max(0.02, Math.min(0.98, finalProbability));
@@ -1252,25 +1333,28 @@
                 }
             }
             
-            // Convert counts to percentages
+           // Convert counts to percentages
+            const teamsPerSeed = 4;
             for (const round in stats.upsetsByRound) {
                 if (round === "R64") {
                     for (const matchup in stats.upsetsByRound[round].byMatchup) {
                         stats.upsetsByRound[round].byMatchup[matchup] = 
-                            (stats.upsetsByRound[round].byMatchup[matchup] / numSimulations * 100).toFixed(1) + "%";
+                            (stats.upsetsByRound[round].byMatchup[matchup] / (numSimulations * teamsPerSeed) * 100).toFixed(1) + "%";
                     }
                 }
                 stats.upsetsByRound[round].total = 
-                    (stats.upsetsByRound[round].total / numSimulations * 100).toFixed(1) + "%";
+                    (stats.upsetsByRound[round].total / (numSimulations * teamsPerSeed) * 100).toFixed(1) + "%";
             }
-            
+
+            // For seed advancement, divide by (numSimulations * 4) since there are 4 teams per seed
             for (const round in stats.seedAdvancement) {
                 for (const seed in stats.seedAdvancement[round]) {
                     stats.seedAdvancement[round][seed] = 
-                        (stats.seedAdvancement[round][seed] / numSimulations * 100).toFixed(1) + "%";
+                        (stats.seedAdvancement[round][seed] / (numSimulations * teamsPerSeed) * 100).toFixed(1) + "%";
                 }
             }
-            
+
+            // For champions by region, divide by numSimulations since there's only one champion
             for (const region in stats.champsByRegion) {
                 stats.champsByRegion[region] = 
                     (stats.champsByRegion[region] / numSimulations * 100).toFixed(1) + "%";
@@ -1286,13 +1370,22 @@
                 const lowerSeed = Math.max(parseInt(match.seed1), parseInt(match.seed2));
                 const winnerSeed = parseInt(match.winnerSeed);
                 
+                // Track which seeds advance to next round
+                stats.seedAdvancement[nextRound][winnerSeed]++;
+                
                 // Track upsets
                 if (winnerSeed > higherSeed) {
                     stats.upsetsByRound[currentRound].total++;
+                    
+                    if (currentRound === "R64") {
+                        // Track by matchup
+                        const matchupKey = `${higherSeed}-${lowerSeed}`;
+                        if (!stats.upsetsByRound[currentRound].byMatchup[matchupKey]) {
+                            stats.upsetsByRound[currentRound].byMatchup[matchupKey] = 0;
+                        }
+                        stats.upsetsByRound[currentRound].byMatchup[matchupKey]++;
+                    }
                 }
-                
-                // Track seed advancement
-                stats.seedAdvancement[nextRound][winnerSeed]++;
             });
         }
         
