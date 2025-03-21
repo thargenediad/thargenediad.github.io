@@ -57,24 +57,24 @@ module.exports = async (req, res) => {
     resultsCache = { tournamentStatus, completedGames };
     
     // For now, return hardcoded results if scraping fails
-    resultsCache = {
-      tournamentStatus: "Round of 32",
-      completedGames: [
-        // Thursday, March 20 results
-        {round: 1, team1: "Louisville", seed1: "8", team2: "Creighton", seed2: "9", winner: "Creighton", winnerSeed: "9"},
-        {round: 1, team1: "Purdue", seed1: "4", team2: "High Point", seed2: "13", winner: "Purdue", winnerSeed: "4"},
-        {round: 1, team1: "Wisconsin", seed1: "3", team2: "Montana", seed2: "14", winner: "Wisconsin", winnerSeed: "3"},
-        {round: 1, team1: "Houston", seed1: "1", team2: "SIU Edwardsville", seed2: "16", winner: "Houston", winnerSeed: "1"},
-        {round: 1, team1: "Auburn", seed1: "1", team2: "Alabama State", seed2: "16", winner: "Auburn", winnerSeed: "1"},
-        {round: 1, team1: "Clemson", seed1: "5", team2: "McNeese", seed2: "12", winner: "McNeese", winnerSeed: "12"},
-        {round: 1, team1: "BYU", seed1: "6", team2: "VCU", seed2: "11", winner: "BYU", winnerSeed: "6"},
-        {round: 1, team1: "Gonzaga", seed1: "8", team2: "Georgia", seed2: "9", winner: "Gonzaga", winnerSeed: "8"},
-        {round: 1, team1: "Tennessee", seed1: "2", team2: "Wofford", seed2: "15", winner: "Tennessee", winnerSeed: "2"},
-        {round: 1, team1: "Kansas", seed1: "7", team2: "Arkansas", seed2: "10", winner: "Arkansas", winnerSeed: "10"},
-        {round: 1, team1: "Texas A&M", seed1: "4", team2: "Yale", seed2: "13", winner: "Texas A&M", winnerSeed: "4"}
-        // Other games scheduled later on Thursday not yet completed
-      ]
-    };
+    // resultsCache = {
+    //   tournamentStatus: "Round of 32",
+    //   completedGames: [
+    //     // Thursday, March 20 results
+    //     {round: 1, team1: "Louisville", seed1: "8", team2: "Creighton", seed2: "9", winner: "Creighton", winnerSeed: "9"},
+    //     {round: 1, team1: "Purdue", seed1: "4", team2: "High Point", seed2: "13", winner: "Purdue", winnerSeed: "4"},
+    //     {round: 1, team1: "Wisconsin", seed1: "3", team2: "Montana", seed2: "14", winner: "Wisconsin", winnerSeed: "3"},
+    //     {round: 1, team1: "Houston", seed1: "1", team2: "SIU Edwardsville", seed2: "16", winner: "Houston", winnerSeed: "1"},
+    //     {round: 1, team1: "Auburn", seed1: "1", team2: "Alabama State", seed2: "16", winner: "Auburn", winnerSeed: "1"},
+    //     {round: 1, team1: "Clemson", seed1: "5", team2: "McNeese", seed2: "12", winner: "McNeese", winnerSeed: "12"},
+    //     {round: 1, team1: "BYU", seed1: "6", team2: "VCU", seed2: "11", winner: "BYU", winnerSeed: "6"},
+    //     {round: 1, team1: "Gonzaga", seed1: "8", team2: "Georgia", seed2: "9", winner: "Gonzaga", winnerSeed: "8"},
+    //     {round: 1, team1: "Tennessee", seed1: "2", team2: "Wofford", seed2: "15", winner: "Tennessee", winnerSeed: "2"},
+    //     {round: 1, team1: "Kansas", seed1: "7", team2: "Arkansas", seed2: "10", winner: "Arkansas", winnerSeed: "10"},
+    //     {round: 1, team1: "Texas A&M", seed1: "4", team2: "Yale", seed2: "13", winner: "Texas A&M", winnerSeed: "4"}
+    //     // Other games scheduled later on Thursday not yet completed
+    //   ]
+    // };
     
     lastFetched = Date.now();
     return res.json(resultsCache);
