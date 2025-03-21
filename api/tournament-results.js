@@ -20,6 +20,7 @@ module.exports = async (req, res) => {
     const response = await axios.get('https://www.ncaa.com/news/basketball-men/mml-official-bracket/2025-03-20/latest-bracket-schedule-and-scores-2025-ncaa-mens-tournament');
     const html = response.data;
     const $ = cheerio.load(html);
+    console.log("Data fetched:", html);
     
     // Find results on the page (adjust selectors based on actual page structure)
     const completedGames = [];
