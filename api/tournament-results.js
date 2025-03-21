@@ -6,6 +6,19 @@ const cheerio = require('cheerio');
 let resultsCache = null;
 let lastFetched = null;
 
+// Add the tournament round determination function here
+function determineTournamentRound(completedGames) {
+  const totalGames = completedGames.length;
+  
+  if (totalGames < 4) return "First Four";
+  if (totalGames < 36) return "Round of 64"; // 4 First Four + up to 32 first round games
+  if (totalGames < 52) return "Round of 32"; // Previous + up to 16 second round games
+  if (totalGames < 60) return "Sweet 16";    // Previous + up to 8 Sweet 16 games
+  if (totalGames < 64) return "Elite Eight"; // Previous + up to 4 Elite Eight games
+  if (totalGames < 66) return "Final Four";  // Previous + up to 2 Final Four games
+  return "Championship";                     // All games completed
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
@@ -25,34 +38,51 @@ module.exports = async (req, res) => {
     // Find results on the page (adjust selectors based on actual page structure)
     const completedGames = [];
     
-    // Example selector pattern - adjust based on actual NCAA page structure
-    $('.tournament-game-completed').each((i, elem) => {
-      const team1 = $(elem).find('.team1-name').text().trim();
-      const seed1 = $(elem).find('.team1-seed').text().trim();
-      const score1 = $(elem).find('.team1-score').text().trim();
+    // Extract game results
+    $('ul li').each((i, elem) => {
+      const gameText = $(elem).text().trim();
       
-      const team2 = $(elem).find('.team2-name').text().trim();
-      const seed2 = $(elem).find('.team2-seed').text().trim();
-      const score2 = $(elem).find('.team2-score').text().trim();
-      
-      const winner = parseInt(score1) > parseInt(score2) ? team1 : team2;
-      const winnerSeed = parseInt(score1) > parseInt(score2) ? seed1 : seed2;
-      
-      completedGames.push({
-        round: 1, // Determine round from context/container
-        team1, 
-        seed1, 
-        team2, 
-        seed2,
-        score1,
-        score2, 
-        winner, 
-        winnerSeed
-      });
+      // Skip games that don't have results yet
+      if (!gameText.includes('vs.')) {
+        // Find winner (in <strong> tags)
+        const winnerText = $(elem).find('strong').text().trim();
+        
+        // Extract team info using regex
+        const winnerRegex = /\((\d+)\)\s+([^,]+)\s+(\d+)/;
+        const winnerMatch = winnerText.match(winnerRegex);
+        
+        if (winnerMatch) {
+          const winnerSeed = winnerMatch[1];
+          const winnerName = winnerMatch[2].trim();
+          const winnerScore = winnerMatch[3];
+          
+          // Extract loser info
+          const loserRegex = /,\s*\((\d+)\)\s+([^,]+)\s+(\d+)/;
+          const loserMatch = gameText.match(loserRegex);
+          
+          if (loserMatch) {
+            const loserSeed = loserMatch[1];
+            const loserName = loserMatch[2].trim();
+            const loserScore = loserMatch[3];
+            
+            completedGames.push({
+              round: 1,
+              team1: winnerName,
+              seed1: winnerSeed,
+              score1: winnerScore,
+              team2: loserName,
+              seed2: loserSeed,
+              score2: loserScore,
+              winner: winnerName,
+              winnerSeed: winnerSeed
+            });
+          }
+        }
+      }
     });
     
     // Determine current tournament round
-    const tournamentStatus = $('.tournament-status').text().trim() || "Round of 64";
+    const tournamentStatus = determineTournamentRound(completedGames);
     
     // Cache the results
     resultsCache = { tournamentStatus, completedGames };
