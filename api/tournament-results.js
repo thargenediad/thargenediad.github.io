@@ -80,6 +80,11 @@ module.exports = async (req, res) => {
     return res.json(resultsCache);
   } catch (error) {
     console.error('Error:', error);
-    res.status(500).json({ error: 'Failed to fetch tournament data' });
+    return res.status(500).json({
+      debug: true,
+      timestamp: new Date().toISOString(),
+      error: error.toString(),
+      stack: error.stack
+    });
   }
 };
